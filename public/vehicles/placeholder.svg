@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120" viewBox="0 0 200 120">
+  <rect fill="#f3f4f6" width="200" height="120" rx="8"/>
+  <g transform="translate(60, 30)">
+    <path fill="#9ca3af" d="M70 45H10c-2.2 0-4-1.8-4-4V31c0-2.2 1.8-4 4-4h5l5-10h40l5 10h5c2.2 0 4 1.8 4 4v10c0 2.2-1.8 4-4 4z"/>
+    <circle fill="#6b7280" cx="22" cy="45" r="8"/>
+    <circle fill="#6b7280" cx="58" cy="45" r="8"/>
+    <circle fill="#e5e7eb" cx="22" cy="45" r="4"/>
+    <circle fill="#e5e7eb" cx="58" cy="45" r="4"/>
+    <rect fill="#d1d5db" x="18" y="24" width="44" height="12" rx="2"/>
+  </g>
+  <text x="100" y="100" text-anchor="middle" font-family="Arial" font-size="12" fill="#9ca3af">Véhicule</text>
+</svg>
