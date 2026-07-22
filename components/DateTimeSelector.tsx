@@ -12,6 +12,13 @@ interface DateTimeSelectorProps {
   monthlyRentalUrl?: string
 }
 
+// Parse a yyyy-MM-dd string as LOCAL midnight. new Date('yyyy-MM-dd') parses as UTC
+// midnight, which shifts to the previous day in negative-offset timezones (e.g. Canada).
+const parseLocalDate = (dateStr: string) => {
+  const [year, month, day] = dateStr.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
 export default function DateTimeSelector({ onDurationChange, onDatesChange, monthlyRentalUrl }: DateTimeSelectorProps) {
   const { t, language } = useLanguage()
   const today = startOfDay(new Date())
@@ -48,7 +55,7 @@ export default function DateTimeSelector({ onDurationChange, onDatesChange, mont
   const [departureMinute, setDepartureMinute] = useState<string>(initialDeparture.minute)
 
   // Return date defaults to next day at 18:00
-  const [returnDate, setReturnDate] = useState<string>(format(addDays(new Date(initialDeparture.date), 1), 'yyyy-MM-dd'))
+  const [returnDate, setReturnDate] = useState<string>(format(addDays(parseLocalDate(initialDeparture.date), 1), 'yyyy-MM-dd'))
   const [returnHour, setReturnHour] = useState<string>('18')
   const [returnMinute, setReturnMinute] = useState<string>('00')
 
@@ -104,7 +111,7 @@ export default function DateTimeSelector({ onDurationChange, onDatesChange, mont
 
   // Validate date for iOS which doesn't always respect min/max attributes
   const handleDepartureDateChange = (value: string) => {
-    const selectedDate = new Date(value)
+    const selectedDate = parseLocalDate(value)
     const minDateValue = startOfDay(new Date())
     const maxDateValue = maxDate
 
@@ -122,16 +129,16 @@ export default function DateTimeSelector({ onDurationChange, onDatesChange, mont
     setDepartureDate(newDepartureDate)
 
     // Auto-adjust return date: if return is before or equal to new departure, set it to the departure date
-    const currentReturn = new Date(returnDate)
-    const newDep = new Date(newDepartureDate)
+    const currentReturn = parseLocalDate(returnDate)
+    const newDep = parseLocalDate(newDepartureDate)
     if (!isAfter(currentReturn, newDep)) {
       setReturnDate(newDepartureDate)
     }
   }
 
   const handleReturnDateChange = (value: string) => {
-    const selectedDate = new Date(value)
-    const minDateValue = new Date(departureDate)
+    const selectedDate = parseLocalDate(value)
+    const minDateValue = parseLocalDate(departureDate)
     const maxDateValue = maxDate
 
     // If date is before departure date, reset to departure date
@@ -203,7 +210,7 @@ export default function DateTimeSelector({ onDurationChange, onDatesChange, mont
 
   const formatDisplayDate = (dateStr: string) => {
     if (!dateStr || dateStr.length < 10) return ''
-    const date = new Date(dateStr)
+    const date = parseLocalDate(dateStr)
     if (isNaN(date.getTime())) return ''
     return format(date, 'EEE d MMM', { locale: language === 'fr' ? fr : enUS })
   }
