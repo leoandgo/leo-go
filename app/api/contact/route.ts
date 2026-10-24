@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         airportDeparture,
         airportArrival,
         predeliveryOption,
-      })
+      }).catch(() => null)
       estimatedPrice = calculation?.totalPrice
     }
 
