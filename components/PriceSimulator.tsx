@@ -41,7 +41,6 @@ export default function PriceSimulator({ vehicles, settings }: PriceSimulatorPro
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           vehicleId: selectedVehicle.id,
-          pricingGridId: selectedVehicle.pricing_grid_id,
           durationMinutes,
           distanceKm,
           airportDeparture,

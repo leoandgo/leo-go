@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { adminFetch } from '@/lib/adminClient'
 import { ContactRequest } from '@/types/database'
 import {
   Mail,
@@ -67,7 +68,7 @@ export default function ContactsAdmin() {
   const updateStatus = async (id: string, status: string) => {
     try {
       // Use API route to avoid CORS/network issues with direct Supabase calls
-      const response = await fetch(`/api/contacts/${id}`, {
+      const response = await adminFetch(`/api/contacts/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),

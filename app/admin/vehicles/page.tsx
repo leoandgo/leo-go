@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
+import { adminFetch } from '@/lib/adminClient'
 import { Vehicle, PricingGrid } from '@/types/database'
 import { Plus, Edit2, Trash2, Save, X, Upload, Image as ImageIcon } from 'lucide-react'
 import { useToast } from '@/components/Toast'
@@ -125,7 +126,7 @@ export default function VehiclesAdmin() {
 
       if (editingId) {
         // Use API route for updates to avoid CORS issues
-        const response = await fetch(`/api/vehicles/${editingId}`, {
+        const response = await adminFetch(`/api/vehicles/${editingId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(dataToSave),
@@ -181,7 +182,7 @@ export default function VehiclesAdmin() {
 
     try {
       // Use API route for deletes to avoid CORS issues
-      const response = await fetch(`/api/vehicles/${id}`, {
+      const response = await adminFetch(`/api/vehicles/${id}`, {
         method: 'DELETE',
       })
 

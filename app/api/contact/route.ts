@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { sendContactNotificationToAdmin, sendContactConfirmationToUser } from '@/lib/mailer'
+import { computeTripPrice } from '@/lib/pricing'
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +10,6 @@ export async function POST(request: NextRequest) {
       email,
       phone,
       vehicleId,
-      estimatedPrice,
       durationMinutes,
       distanceKm,
       departureDateTime,
@@ -31,6 +31,20 @@ export async function POST(request: NextRequest) {
         { error: 'Valid phone number is required' },
         { status: 400 }
       )
+    }
+
+    // Price is recomputed server-side; a client-supplied estimate is never stored
+    let estimatedPrice: number | undefined
+    if (vehicleId && durationMinutes > 0) {
+      const calculation = await computeTripPrice({
+        vehicleId,
+        durationMinutes,
+        distanceKm,
+        airportDeparture,
+        airportArrival,
+        predeliveryOption,
+      })
+      estimatedPrice = calculation?.totalPrice
     }
 
     // Fetch vehicle name if vehicleId is provided

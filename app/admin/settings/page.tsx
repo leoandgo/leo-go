@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { adminFetch } from '@/lib/adminClient'
 import { Save, RefreshCw, Palette, Link } from 'lucide-react'
 import { useToast } from '@/components/Toast'
 
@@ -93,7 +94,7 @@ export default function SettingsAdmin() {
         }
 
         if (shouldUpdate) {
-          const response = await fetch('/api/settings', {
+          const response = await adminFetch('/api/settings', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updateBody),

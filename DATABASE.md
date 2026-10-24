@@ -13,6 +13,7 @@ This document describes the structure of the Supabase database tables used by th
 | `minute_prices` | Price per duration for each grid |
 | `global_settings` | Global configuration values |
 | `contact_requests` | Quote requests from users |
+| `admin_users` | Accounts allowed to use the admin panel |
 
 ---
 
@@ -123,6 +124,24 @@ Stores quote requests submitted by users.
 
 **Relationships:**
 - `vehicle_id` → `vehicles.id`
+
+---
+
+## Access control (RLS)
+
+Every table has Row Level Security enabled (see `supabase/migrations/`):
+
+- **Public (anon key):** read-only access to `vehicles`, `pricing_grids`, `minute_prices` and `global_settings`. `contact_requests` accepts inserts only (`status = 'pending'`) and can never be read back.
+- **Admins:** full access to every table, granted only to accounts listed in `admin_users` (checked by `private.is_admin()`). A signed-in account that is not in this table has no write access.
+- Admin API routes (`PUT /api/settings`, `PATCH /api/contacts/[id]`, `PATCH|DELETE /api/vehicles/[id]`) require the user's access token (`Authorization: Bearer …`) and check `admin_users` before acting as that user.
+- Prices are always computed server-side from the vehicle's own pricing grid.
+
+**Adding an admin:** create the user in Supabase Auth (public sign-up is disabled), then run:
+
+```sql
+insert into public.admin_users (user_id)
+select id from auth.users where email = 'new.admin@leoandgo.com';
+```
 
 ---
 

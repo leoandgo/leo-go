@@ -1,30 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { requireAdmin } from '@/lib/adminAuth'
 
-// Create a server-side Supabase client
-const getSupabase = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Missing Supabase environment variables')
-  }
-
-  return createClient(supabaseUrl, supabaseKey)
-}
+const STATUSES = ['pending', 'contacted', 'closed']
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.error) return auth.error
+
     const { id } = await params
     const body = await request.json()
-    const supabase = getSupabase()
 
-    const { data, error } = await supabase
+    // Only the follow-up status can be changed from the back-office
+    if (!STATUSES.includes(body.status)) {
+      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
+    }
+
+    const { data, error } = await auth.client
       .from('contact_requests')
-      .update(body)
+      .update({ status: body.status })
       .eq('id', id)
       .select()
       .single()

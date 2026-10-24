@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { isAdmin } from '@/lib/adminClient'
 import { User } from '@supabase/supabase-js'
 import Link from 'next/link'
 import {
@@ -34,6 +35,13 @@ export default function AdminLayout({
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession()
+      // A valid session is not enough: the account must be listed in admin_users
+      if (session && pathname !== '/admin/login' && !(await isAdmin(session.user.id))) {
+        await supabase.auth.signOut()
+        router.push('/admin/login')
+        setLoading(false)
+        return
+      }
       if (!session && pathname !== '/admin/login') {
         router.push('/admin/login')
       } else {

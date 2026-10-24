@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { isAdmin } from '@/lib/adminClient'
 import { Lock, Mail } from 'lucide-react'
 
 export default function AdminLogin() {
@@ -29,6 +30,11 @@ export default function AdminLogin() {
       }
 
       if (data.session) {
+        if (!(await isAdmin(data.session.user.id))) {
+          await supabase.auth.signOut()
+          setError('Accès non autorisé')
+          return
+        }
         router.push('/admin')
       }
     } catch {

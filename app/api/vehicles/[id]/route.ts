@@ -1,28 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-// Create a server-side Supabase client
-const getSupabase = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Missing Supabase environment variables')
-  }
-
-  return createClient(supabaseUrl, supabaseKey)
-}
+import { requireAdmin } from '@/lib/adminAuth'
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.error) return auth.error
+
     const { id } = await params
     const body = await request.json()
-    const supabase = getSupabase()
 
-    const { data, error } = await supabase
+    const { data, error } = await auth.client
       .from('vehicles')
       .update(body)
       .eq('id', id)
@@ -49,10 +39,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
-    const supabase = getSupabase()
+    const auth = await requireAdmin(request)
+    if (auth.error) return auth.error
 
-    const { error } = await supabase
+    const { id } = await params
+
+    const { error } = await auth.client
       .from('vehicles')
       .delete()
       .eq('id', id)

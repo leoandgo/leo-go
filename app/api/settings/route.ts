@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { GlobalSettings } from '@/types/database'
+import { requireAdmin } from '@/lib/adminAuth'
 
 export async function GET() {
   try {
@@ -49,6 +50,9 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.error) return auth.error
+
     const body = await request.json()
     const { id, key, value, text_value } = body
 
@@ -64,7 +68,7 @@ export async function PUT(request: NextRequest) {
       : { value: value ?? 0 }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase.from('global_settings') as any)
+    const { error } = await (auth.client.from('global_settings') as any)
       .update(updateData)
       .eq('id', id)
 
